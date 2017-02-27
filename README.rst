@@ -4,6 +4,22 @@
 - `API文档 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1>`_
 
 
+使用
+----
+
+initialized::
+
+    from flask_wxpay import WXPay
+    wxpay = WXPay()
+    wxpay.init_app(app)
+
+创建订单,生成prepay data::
+
+    out_trade_no = wxpay.gen_out_trade_no()
+    order_data = wxpay.unified_order(out_trade_no, price, ip, body, openid=openid)
+    prepay_data = wxpay.get_jsapi_prepay_data(order_data['prepay_id'])
+
+
 out_trade_no和out_refund_no生成规则
 ----------------------------------
 
