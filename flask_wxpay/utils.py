@@ -24,7 +24,7 @@ def xml_to_data(xml):
 def data_to_xml(data):
     xml = ['<xml>']
     for k, v in data.items():
-        if isinstance(v, (int, numeric_types)) or v.isdigit():
+        if isinstance(v, numeric_types) or v.isdigit():
             xml.append('<{0}>{1}</{0}>'.format(k, v))
         else:
             xml.append('<{0}><![CDATA[{1}]]></{0}>'.format(k, v))
