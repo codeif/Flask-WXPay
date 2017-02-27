@@ -7,7 +7,7 @@ with open('README.rst') as f:
 
 setup(
     name='Flask-WXPay',
-    version='0.1.0',
+    version='0.1.1',
     description='Flask Extension for WeChat Pay.',
     long_description=readme,
     author='codeif',
