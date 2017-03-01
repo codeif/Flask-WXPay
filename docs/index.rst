@@ -1,11 +1,19 @@
-微信支付Flask扩展
-================
+:orphan:
 
-- `API文档 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1>`_
+Flask-WXPay
+=============
+
+一个微信支付的Flask插件
 
 
-使用
-----
+Installation
+------------
+Install the module with one of the following commands::
+
+    pip install Flask-WXPay
+
+Usage
+-----
 
 initialized::
 
@@ -21,36 +29,10 @@ initialized::
 
 
 out_trade_no和out_refund_no生成规则
-----------------------------------
+-----------------------------------
 
 prefix + 一个随机小写字母(a-z) + datetime.now().strftime('%Y%m%d%H%M%S%f'),
 例如: wxk20170214145251287492
-
-
-检查回调结果
-------------
-
-.. py:function::  wxpay.check_notify(data)
-
-检查notify返回的数据,
-`微信文档 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7>`_
-
-如果结果不合法会抛出一个NotifyError的子类
-
-:params data: 微信支付回调结果xml转化成的dict数据
-:return: no return
-:raises NotifySignError: 签名不正确的异常
-:raises NotifyReturnError: return_code不为SUCCESS
-:raises NotifyResultError: result_code不为SUCCESS
-
-用法::
-
-    data = xml_to_dict(request.data)
-    try:
-        check_notify(data)
-    except NotifyError as e:
-        return wxpay.notify_response('FAIL', e.msg)
-    do something ...
 
 
 配置项
@@ -66,3 +48,14 @@ WXPAY_CERT_KEY_PATH         默认值None
 WXPAY_OUT_TRADE_NO_PREFIX   out_trade_no前缀, 默认值wx。
 WXPAY_OUT_REFUND_NO_PREFIX  out_refund_no前缀，默认值ref。
 ==========================  =============================
+
+
+
+Reference
+---------
+
+.. toctree::
+   :maxdepth: 2
+
+   api
+   exceptions

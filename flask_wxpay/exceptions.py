@@ -5,11 +5,11 @@ class WXPayError(Exception):
     """A WXPay error occurred."""
 
 
-class WXPayCertError(Exception):
-    """双向证书的接口， 为配置证书时抛出"""
+class CertError(WXPayError):
+    """双向证书的接口， 使用证书的接口如果未配置证书时抛出"""
 
 
-class NotifyError(Exception):
+class NotifyError(WXPayError):
     """支付通知相关的错误"""
     def __init__(self, msg=''):
         self.msg = msg

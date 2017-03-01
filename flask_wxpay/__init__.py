@@ -10,11 +10,15 @@ import httpdns
 
 from .utils import gen_random_str, md5, dict_to_xml, xml_to_dict
 from .exceptions import (
-    WXPayError, WXPayCertError, NotifySignError, NotifyReturnError,
+    WXPayError, CertError, NotifySignError, NotifyReturnError,
     NotifyResultError)
 
 
+__version__ = '0.1.3'
+
+
 class WXPay(object):
+    """微信支付类"""
 
     def __init__(self, app=None):
         self.api_host = 'api.mch.weixin.qq.com'
@@ -57,7 +61,7 @@ class WXPay(object):
         xml_data = dict_to_xml(params).encode('utf-8')
         if cert:
             if not (self.cert_path and self.cert_key_path):
-                raise WXPayCertError()
+                raise CertError()
             api_cert = (self.cert_path, self.cert_key_path)
         else:
             api_cert = None
@@ -118,15 +122,25 @@ class WXPay(object):
         # 签名步骤四: 所有字符转为大写
         return result.upper()
 
-    def unified_order(self, out_trade_no, total_fee, ip, body,
+    def unified_order(self, out_trade_no, total_fee, ip, body, expire_seconds,
                       notify_url=None, trade_type='JSAPI', openid=None):
-        """统一下单
-        api: https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_1
+        """`统一下单
+        <https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_1>`_
+
+        :params out_trade_no: 商户订单号
+        :params total_fee: 总金额，单位为分
+        :params ip: 用户端实际ip
+        :params body: 商品描述
+        :params expire_seconds: 订单失效时间,最短失效时间间隔必须大于5分钟
+        :params notify_url: 微信支付异步通知回调地址, 默认使用WXPAY_NOTIFY_URL的配置
+        :params trade_type: JSAPI，NATIVE，APP, 默认值为JSAPI
+        :params openid: 用户openid, trade_type为JSAPI时需要
+        :rtype: dict
         """
         api_path = '/pay/unifiedorder'
         now = datetime.now()
         time_start = now.strftime('%Y%m%d%H%M%S')
-        time_expire = (now + timedelta(minutes=5, seconds=5))\
+        time_expire = (now + timedelta(seconds=expire_seconds))\
             .strftime('%Y%m%d%H%M%S')
 
         params = dict(
@@ -154,8 +168,8 @@ class WXPay(object):
         return data
 
     def query_order(self, transaction_id=None, out_trade_no=None):
-        """查询订单
-        api: https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_2&index=4
+        """`查询订单
+        <https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_2&index=4>`_
         """
         api_path = '/pay/orderquery'
         if not (transaction_id or out_trade_no):
@@ -170,16 +184,15 @@ class WXPay(object):
         return data
 
     def close_order(self, out_trade_no):
-        """关闭订单
-        api:https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_3&index=5
+        """`关闭订单
+        <https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_3&index=5>`_
         """
         api_path = '/pay/closeorder'
         params = dict(out_trade_no=out_trade_no)
         return self._post(api_path, params)
 
     def refund(self, out_trade_no, out_refund_no, total_fee, refund_fee):
-        """退款
-        api: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4
+        """`退款 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4>`_
         """
         api_path = '/secapi/pay/refund'
         params = dict(
@@ -192,7 +205,7 @@ class WXPay(object):
         return self._post(api_path, params, cert=True)
 
     def gen_mch_billno(self):
-        """商户订单号（每个订单号必须唯一）
+        """商户订单号（每个订单号必须唯一），
         组成：mch_id+yyyymmdd+10位一天内不能重复的数字。
         接口根据商户订单号支持重入，如出现超时可再调用。
         """
@@ -202,14 +215,15 @@ class WXPay(object):
     def sendredpack(self, mch_billno, send_name, re_openid, total_amount,
                     wishing, client_ip, act_name, remark):
         """发红包
-        :param mch_billno: 商户订单号
-        :param send_name: 商户名称
-        :param re_openid: 用户openid
-        :param total_amount: 付款金额
-        :param wishing: 红包祝福语
-        :param client_ip: 调用接口的机器IP地址
-        :param act_name: 活动名称
-        :param remark: 备注信息
+
+        :params mch_billno: 商户订单号
+        :params send_name: 商户名称
+        :params re_openid: 用户openid
+        :params total_amount: 付款金额
+        :params wishing: 红包祝福语
+        :params client_ip: 调用接口的机器IP地址
+        :params act_name: 活动名称
+        :params remark: 备注信息
         """
         api_path = '/mmpaymkttransfers/sendredpack'
         params = dict(
@@ -238,6 +252,12 @@ class WXPay(object):
         return self._post(api_path, params, cert=True)
 
     def get_app_prepay_data(self, prepay_id):
+        """返回给客户端的prepay数据
+
+        :params prepay_id: :meth:`unified_order` 接口获取到的prepay_id
+        :return: prepay data
+        :rtype: dict
+        """
         data = dict(
             appid=self.appid,
             noncestr=gen_random_str,
@@ -250,6 +270,12 @@ class WXPay(object):
         return data
 
     def get_jsapi_prepay_data(self, prepay_id):
+        """返回给公众号的prepay数据
+
+        :params prepay_id: :meth:`unified_order` 接口获取到的prepay_id
+        :return: prepay data
+        :rtype: dict
+        """
         data = dict(
             appId=self.appid,
             timeStamp=str(int(time.time())),
@@ -275,16 +301,19 @@ class WXPay(object):
         return dict_to_xml(return_code=return_code, return_msg=return_msg)
 
     def check_notify(self, data):
-        """解析notify返回的数据
-        文档: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
+        """检查notify返回的数据,
+        `支付结果通知
+        <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7>`_
 
-        如果结果不成功会抛出一个NotifyError的子类
+        如果结果不合法会抛出一个NotifyError的子类
 
-        raise NotifySignError, 当签名不正确时抛出
-        raise NotifyReturnError, 当return_code不为SUCCESS时抛出
-        raise NotifyResultError, 当result不为SUCCESS时抛出
+        :params data: 微信支付回调结果xml转化成的dict数据
+        :return: no return
+        :raises NotifySignError: 签名不正确的异常
+        :raises NotifyReturnError: return_code不为SUCCESS
+        :raises NotifyResultError: result_code不为SUCCESS
 
-        用法举例::
+        用法::
 
             data = xml_to_dict(request.data)
             try:
