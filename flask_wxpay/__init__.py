@@ -9,7 +9,9 @@ import requests
 import httpdns
 
 from .utils import gen_random_str, md5, dict_to_xml, xml_to_dict
-from .exceptions import WXPayError, WXPayCertError
+from .exceptions import (
+    WXPayError, WXPayCertError, NotifySignError, NotifyReturnError,
+    NotifyResultError)
 
 
 class WXPay(object):
@@ -266,3 +268,35 @@ class WXPay(object):
         del tmp_data['sign']
         sign = self.get_sign(tmp_data)
         return data['sign'] == sign
+
+    @staticmethod
+    def notify_response(return_code='SUCCESS', return_msg='OK'):
+        """通知结果的返回"""
+        return dict_to_xml(return_code=return_code, return_msg=return_msg)
+
+    def check_notify(self, data):
+        """解析notify返回的数据
+        文档: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
+
+        如果结果不成功会抛出一个NotifyError的子类
+
+        raise NotifySignError, 当签名不正确时抛出
+        raise NotifyReturnError, 当return_code不为SUCCESS时抛出
+        raise NotifyResultError, 当result不为SUCCESS时抛出
+
+        用法举例::
+
+            data = xml_to_dict(request.data)
+            try:
+                check_notify(data)
+            except NotifyError as e:
+                return wxpay.notify_response('FAIL', e.msg)
+            do something ...
+        """
+        if not self.check_sign(data):
+            raise NotifySignError()
+        elif data['return_code'] != 'SUCCESS':
+            raise NotifyReturnError(data.get('return_msg', ''))
+        elif data['result_code'] != 'SUCCESS':
+            raise NotifyResultError(data.get('err_code'),
+                                    data.get('err_code_desc', ''))
