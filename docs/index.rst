@@ -3,7 +3,8 @@
 Flask-WXPay
 =============
 
-一个微信支付的Flask插件
+一个微信支付的Flask插件,
+`微信支付API <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1>`_
 
 
 Installation

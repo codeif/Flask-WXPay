@@ -1,7 +1,10 @@
 微信支付Flask扩展
 ================
 
-- `API文档 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1>`_
+文档
+----
+
+帮助文档: http://flask-wxpay.readthedocs.io/en/latest/
 
 
 使用
@@ -25,23 +28,6 @@ out_trade_no和out_refund_no生成规则
 
 prefix + 一个随机小写字母(a-z) + datetime.now().strftime('%Y%m%d%H%M%S%f'),
 例如: wxk20170214145251287492
-
-
-检查回调结果
-------------
-
-.. py:function::  wxpay.check_notify(data)
-
-检查notify返回的数据,
-`微信文档 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7>`_
-
-如果结果不合法会抛出一个NotifyError的子类
-
-:params data: 微信支付回调结果xml转化成的dict数据
-:return: no return
-:raises NotifySignError: 签名不正确的异常
-:raises NotifyReturnError: return_code不为SUCCESS
-:raises NotifyResultError: result_code不为SUCCESS
 
 用法::
 

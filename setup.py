@@ -13,7 +13,7 @@ with open('flask_wxpay/__init__.py', 'r') as fd:
 
 setup(
     name='Flask-WXPay',
-    version='0.1.3',
+    version=version,
     description='Flask Extension for WeChat Pay.',
     long_description=readme,
     author='codeif',
