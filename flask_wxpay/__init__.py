@@ -8,7 +8,7 @@ import requests
 
 import httpdns
 
-from .utils import gen_random_str, md5, data_to_xml, xml_to_data
+from .utils import gen_random_str, md5, dict_to_xml, xml_to_dict
 from .exceptions import WXPayError, WXPayCertError
 
 
@@ -52,7 +52,7 @@ class WXPay(object):
 
         params['sign'] = self.get_sign(params)
 
-        xml_data = data_to_xml(params).encode('utf-8')
+        xml_data = dict_to_xml(params).encode('utf-8')
         if cert:
             if not (self.cert_path and self.cert_key_path):
                 raise WXPayCertError()
@@ -80,7 +80,7 @@ class WXPay(object):
         if r.encoding == 'ISO-8859-1':
             r.encoding = 'UTF-8'
         xml = r.text
-        data = xml_to_data(xml)
+        data = xml_to_dict(xml)
         if not (cert or self.check_sign(data)):
             msg = u'path-{0} result sign error\n body-{1}'.format(path, xml)
             raise WXPayError(msg)

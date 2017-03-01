@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ElementTree
 from .compat import str, numeric_types, bytes
 
 
-def xml_to_data(xml):
+def xml_to_dict(xml):
     if isinstance(xml, str):
         xml = xml.encode('utf-8')
     data = {}
@@ -21,7 +21,7 @@ def xml_to_data(xml):
     return data
 
 
-def data_to_xml(data):
+def dict_to_xml(data):
     xml = ['<xml>']
     for k, v in data.items():
         if isinstance(v, numeric_types) or v.isdigit():
