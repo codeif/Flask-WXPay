@@ -315,12 +315,18 @@ class WXPay(object):
 
         用法::
 
+
             data = xml_to_dict(request.data)
             try:
-                check_notify(data)
+                wxpay.check_notify(data)
             except NotifyError as e:
+                logger.error('wxpay notify error:\n %s', data)
                 return wxpay.notify_response('FAIL', e.msg)
-            do something ...
+
+            do something handle trade
+            ...
+
+            return wxpay.notify_response()
         """
         if not self.check_sign(data):
             raise NotifySignError()
