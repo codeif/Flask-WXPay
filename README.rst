@@ -29,16 +29,6 @@ out_trade_no和out_refund_no生成规则
 prefix + 一个随机小写字母(a-z) + datetime.now().strftime('%Y%m%d%H%M%S%f'),
 例如: wxk20170214145251287492
 
-用法::
-
-    data = xml_to_dict(request.data)
-    try:
-        check_notify(data)
-    except NotifyError as e:
-        return wxpay.notify_response('FAIL', e.msg)
-    do something ...
-
-
 配置项
 ------
 
