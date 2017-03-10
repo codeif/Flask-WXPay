@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
+
+__version__ = '0.1.4'  # noqa
+
 from datetime import datetime, timedelta
 import time
-import random
 import json
 import requests
 
 import httpdns
 
-from .utils import gen_random_str, md5, dict_to_xml, xml_to_dict
+from .utils import gen_random_str, md5, dict_to_xml, xml_to_dict, now_str  # noqa
 from .exceptions import (
     WXPayError, CertError, NotifySignError, NotifyReturnError,
     NotifyResultError)
-
-
-__version__ = '0.1.3'
 
 
 class WXPay(object):
@@ -37,11 +36,6 @@ class WXPay(object):
 
         self.cert_path = app.config.get('WXPAY_CERT_PATH')
         self.cert_key_path = app.config.get('WXPAY_CERT_KEY_PATH')
-
-        self.out_trade_no_prefix = \
-            app.config.get('WXPAY_OUT_TRADE_NO_PREFIX', 'wx')
-        self.out_refund_no_prefix = \
-            app.config.get('WXPAY_OUT_REFUND_NO_PREFIX', 'ref')
 
     def _post(self, path, params, cert=False):
         """添加发送签名
@@ -91,23 +85,6 @@ class WXPay(object):
             msg = u'path-{0} result sign error\n body-{1}'.format(path, xml)
             raise WXPayError(msg)
         return data
-
-    @staticmethod
-    def _gen_out_no(prefix):
-        """用于生成随机单号的"""
-        now_str = datetime.now().strftime('%Y%m%d%H%M%S%f')
-        chars = 'abcdefghijklmnopqrstuvwxyz'
-        return '{0}{1}{2}'.format(prefix, random.choice(chars), now_str)
-
-    def gen_out_trade_no(self):
-        """生成out_trade_no"""
-        prefix = self.out_trade_no_prefix
-        return self._gen_out_no(prefix)
-
-    def gen_out_refund_no(self):
-        """生成退款单号"""
-        prefix = self.out_refund_no_prefix
-        return self._gen_out_no(prefix)
 
     def get_sign(self, data):
         """生成签名"""
@@ -203,14 +180,6 @@ class WXPay(object):
             op_user_id=self.mch_id
         )
         return self._post(api_path, params, cert=True)
-
-    def gen_mch_billno(self):
-        """商户订单号（每个订单号必须唯一），
-        组成：mch_id+yyyymmdd+10位一天内不能重复的数字。
-        接口根据商户订单号支持重入，如出现超时可再调用。
-        """
-        now_str = datetime.now().strftime('%Y%m%d%H%M%S%f')[:18]
-        return '{0}{1}'.format(self.mch_id, now_str)
 
     def sendredpack(self, mch_billno, send_name, re_openid, total_amount,
                     wishing, client_ip, act_name, remark):

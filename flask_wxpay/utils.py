@@ -3,6 +3,7 @@ import random
 import string
 import hashlib
 import xml.etree.ElementTree as ElementTree
+from datetime import datetime
 
 from .compat import str, numeric_types, bytes
 
@@ -45,3 +46,8 @@ def md5(origin):
     if isinstance(origin, str):
         origin = origin.encode('utf-8')
     return hashlib.md5(origin).hexdigest()
+
+
+def now_str(format='%Y%m%d%H%M%S%f'):
+    """当前时间的字符串形式, 例如：20170310165231887517"""
+    return datetime.now().strftime(format)
