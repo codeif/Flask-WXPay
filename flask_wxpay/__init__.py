@@ -167,7 +167,7 @@ class WXPay(object):
 
         return data
 
-    def query_order(self, transaction_id=None, out_trade_no=None):
+    def query_order(self, out_trade_no=None, transaction_id=None):
         """`查询订单
         <https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_2&index=4>`_
         """
