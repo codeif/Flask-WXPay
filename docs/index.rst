@@ -75,10 +75,8 @@ The following error classes exist in Flask-WXPay:
 
 .. autoexception:: CertError
 
-.. autoexception:: NotifyError
+.. autoexception:: ReturnCodeFail
 
-.. autoexception:: NotifySignError
+.. autoexception:: ResultCodeFail
 
-.. autoexception:: NotifyReturnError
-
-.. autoexception:: NotifyResultError
+.. autoexception:: SignError

@@ -12,8 +12,7 @@ import httpdns
 
 from .utils import gen_random_str, md5, dict_to_xml, xml_to_dict, now_str  # noqa
 from .exceptions import (
-    WXPayError, CertError, NotifySignError, NotifyReturnError,
-    NotifyResultError)
+    WXPayError, CertError, ReturnCodeFail, ResultCodeFail, SignError)
 
 
 class WXPay(object):
@@ -37,7 +36,7 @@ class WXPay(object):
         self.cert_path = app.config.get('WXPAY_CERT_PATH')
         self.cert_key_path = app.config.get('WXPAY_CERT_KEY_PATH')
 
-    def _post(self, path, params, cert=False):
+    def _post(self, path, params, use_cert=False):
         """添加发送签名
         处理返回结果成dict, 并检查签名
         """
@@ -53,7 +52,7 @@ class WXPay(object):
         params['sign'] = self.get_sign(params)
 
         xml_data = dict_to_xml(params).encode('utf-8')
-        if cert:
+        if use_cert:
             if not (self.cert_path and self.cert_key_path):
                 raise CertError()
             api_cert = (self.cert_path, self.cert_key_path)
@@ -81,11 +80,9 @@ class WXPay(object):
             r.encoding = 'UTF-8'
         xml = r.text
         data = xml_to_dict(xml)
-        if data['return_code'] == 'FAIL':
-            raise WXPayError(data['return_msg'])
-        if not (cert or self.check_sign(data)):
-            msg = 'path-{0} result sign error\n body-{1}'.format(path, xml)
-            raise WXPayError(msg)
+        # 使用证书的接口不检查sign
+        check_sign = not use_cert
+        self.check_data(data, check_sign)
         return data
 
     def get_sign(self, data):
@@ -271,37 +268,35 @@ class WXPay(object):
         """通知结果的返回"""
         return dict_to_xml(return_code=return_code, return_msg=return_msg)
 
-    def check_notify(self, data):
-        """检查notify返回的数据,
-        `支付结果通知
-        <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7>`_
+    def check_data(self, data, check_sign=True):
+        """检查请求结果或者支付通知数据的正确性
+        如果结果不合法会抛出一个WXPayError的子类
 
-        如果结果不合法会抛出一个NotifyError的子类
-
-        :params data: 微信支付回调结果xml转化成的dict数据
+        :params data: xml转化成的dict数据
         :return: no return
-        :raises NotifySignError: 签名不正确的异常
-        :raises NotifyReturnError: return_code不为SUCCESS
-        :raises NotifyResultError: result_code不为SUCCESS
+        :raises ReturnCodeFail: return_code FAIL
+        :raises ResultCodeFail: result_code FAIL
+        :raises SignError: 签名错误
 
-        用法::
+        例如处理支付回调用法::
 
-            data = xml_to_dict(request.data)
+            data = xml_to_dict(xml)
             try:
                 wxpay.check_notify(data)
-            except NotifyError as e:
-                logger.error('wxpay notify error: %s', data)
-                return wxpay.notify_response('FAIL', e.msg)
+            except SignError:
+                return wxpay.notify_response('FAIL', '签名错误')
+            except WXPayError:
+                logger.error('微信支付数据错误', exc_info=True)
+                return wxpay.notify_response('FAIL', '数据错误')
 
             do something handle trade
             ...
 
             return wxpay.notify_response()
         """
-        if not self.check_sign(data):
-            raise NotifySignError()
-        elif data['return_code'] != 'SUCCESS':
-            raise NotifyReturnError(data.get('return_msg', ''))
-        elif data['result_code'] != 'SUCCESS':
-            raise NotifyResultError(data.get('err_code'),
-                                    data.get('err_code_desc', ''))
+        if data['return_code'] == 'FAIL':
+            raise ReturnCodeFail(data['return_msg'])
+        elif data['result_code'] == 'FAIL':
+            raise ResultCodeFail(data['err_code'], data['err_code_des'])
+        elif check_sign and not self.check_sign(data):
+            raise SignError()

@@ -18,8 +18,11 @@ initialized::
 
 创建订单,生成prepay data::
 
-    out_trade_no = wxpay.gen_out_trade_no()
-    order_data = wxpay.unified_order(out_trade_no, price, ip, body, openid=openid)
+    from flask_wxpay import now_str
+    from core import wxpay
+
+    out_trade_no = now_str()
+    order_data = wxpay.unified_order(out_trade_no, total_fee, ip, body, openid=openid)
     prepay_data = wxpay.get_jsapi_prepay_data(order_data['prepay_id'])
 
 
