@@ -16,7 +16,7 @@ class ReturnCodeFail(WXPayError):
         self.return_msg = return_msg
 
     def str(self):
-        return 'return_code FAIL, return_msg: {}'.foramt(self.return_msg)
+        return 'return_code: FAIL, return_msg: {}'.foramt(self.return_msg)
 
 
 class ResultCodeFail(WXPayError):
@@ -29,7 +29,7 @@ class ResultCodeFail(WXPayError):
         self.err_code_des = err_code_des
 
     def __str__(self):
-        return 'result_code FAIL, err_code: {}, err_code_des: {}'.format(
+        return 'result_code: FAIL, err_code: {}, err_code_des: {}'.format(
             self.err_code,
             self.err_code_des)
 
