@@ -81,8 +81,10 @@ class WXPay(object):
             r.encoding = 'UTF-8'
         xml = r.text
         data = xml_to_dict(xml)
+        if data['return_code'] == 'FAIL':
+            raise WXPayError(data['return_msg'])
         if not (cert or self.check_sign(data)):
-            msg = u'path-{0} result sign error\n body-{1}'.format(path, xml)
+            msg = 'path-{0} result sign error\n body-{1}'.format(path, xml)
             raise WXPayError(msg)
         return data
 
