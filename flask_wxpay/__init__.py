@@ -282,7 +282,7 @@ class WXPay(object):
 
             data = xml_to_dict(xml)
             try:
-                wxpay.check_notify(data)
+                wxpay.check_data(data)
             except SignError:
                 return wxpay.notify_response('FAIL', '签名错误')
             except WXPayError:
