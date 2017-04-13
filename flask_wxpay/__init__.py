@@ -29,6 +29,7 @@ class WXPay(object):
 
     def init_app(self, app):
         self.appid = app.config['WX_APPID']
+        self.sandbox = app.config.get('WXPAY_SANDBOX', False)
         self.mch_id = app.config['WXPAY_MCHID']
         self.key = app.config['WXPAY_KEY']
         self.notify_url = app.config['WXPAY_NOTIFY_URL']
@@ -59,6 +60,8 @@ class WXPay(object):
         else:
             api_cert = None
 
+        if self.sandbox:
+            path = '/sandboxnew' + path
         for _ in range(3):
             try:
                 url = '{0}://{1}{2}'.format(self.scheme,
