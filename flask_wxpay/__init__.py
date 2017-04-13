@@ -37,7 +37,7 @@ class WXPay(object):
         self.cert_path = app.config.get('WXPAY_CERT_PATH')
         self.cert_key_path = app.config.get('WXPAY_CERT_KEY_PATH')
 
-    def _post(self, path, data, use_cert=False):
+    def _post(self, path, data, use_cert=False, check_result=True):
         """添加发送签名
         处理返回结果成dict, 并检查签名
         """
@@ -84,8 +84,9 @@ class WXPay(object):
         xml = r.text
         data = xml_to_dict(xml)
         # 使用证书的接口不检查sign
-        check_sign = not use_cert
-        self.check_data(data, check_sign)
+        if check_result:
+            check_sign = not use_cert
+            self.check_data(data, check_sign)
         return data
 
     def get_sign(self, data):
@@ -225,7 +226,7 @@ class WXPay(object):
         """获取验签秘钥，沙箱环境下有效"""
         path = '/pay/getsignkey'
         data = dict()
-        return self._post(path, data)
+        return self._post(path, data, check_result=False)
 
     def get_app_prepay_data(self, prepay_id):
         """返回给客户端的prepay数据
