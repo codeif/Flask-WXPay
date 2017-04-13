@@ -37,22 +37,22 @@ class WXPay(object):
         self.cert_path = app.config.get('WXPAY_CERT_PATH')
         self.cert_key_path = app.config.get('WXPAY_CERT_KEY_PATH')
 
-    def _post(self, path, params, use_cert=False):
+    def _post(self, path, data, use_cert=False):
         """添加发送签名
         处理返回结果成dict, 并检查签名
         """
-        base_params = dict(
+        base_data = dict(
             appid=self.appid,
             mch_id=self.mch_id,
             nonce_str=gen_random_str()
         )
         if path == '/mmpaymkttransfers/sendredpack':
-            del base_params['appid']
-        params.update(base_params)
+            del base_data['appid']
+        data.update(base_data)
 
-        params['sign'] = self.get_sign(params)
+        data['sign'] = self.get_sign(data)
 
-        xml_data = dict_to_xml(params).encode('utf-8')
+        xml_data = dict_to_xml(data).encode('utf-8')
         if use_cert:
             if not (self.cert_path and self.cert_key_path):
                 raise CertError()
@@ -116,13 +116,13 @@ class WXPay(object):
         :params openid: 用户openid, trade_type为JSAPI时需要
         :rtype: dict
         """
-        api_path = '/pay/unifiedorder'
+        path = '/pay/unifiedorder'
         now = datetime.now()
         time_start = now.strftime('%Y%m%d%H%M%S')
         time_expire = (now + timedelta(seconds=expire_seconds))\
             .strftime('%Y%m%d%H%M%S')
 
-        params = dict(
+        data = dict(
             body=body,
             notify_url=notify_url or self.notify_url,
             out_trade_no=out_trade_no,
@@ -135,53 +135,52 @@ class WXPay(object):
         if trade_type == 'JSAPI':
             if not openid:
                 raise WXPayError('微信内支付需要openid')
-            params['openid'] = openid
+            data['openid'] = openid
 
-        data = self._post(api_path, params)
+        result = self._post(path, data)
 
-        if data['return_code'] != 'SUCCESS':
-            msg = '统一下单错误, msg-{0},\nparams-{1}' \
-                .format(data['return_msg'], json.dumps(params))
+        if result['return_code'] != 'SUCCESS':
+            msg = '统一下单错误, msg-{0},\ndata-{1}' \
+                .format(result['return_msg'], json.dumps(data))
             raise WXPayError(msg)
 
-        return data
+        return result
 
     def query_order(self, out_trade_no=None, transaction_id=None):
         """`查询订单
         <https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=9_2&index=4>`_
         """
-        api_path = '/pay/orderquery'
+        path = '/pay/orderquery'
         if not (transaction_id or out_trade_no):
             raise WXPayError('查询订单需要transaction_id or out_trade_no')
-        params = dict()
+        data = dict()
         if transaction_id:
-            params['transaction_id'] = transaction_id
+            data['transaction_id'] = transaction_id
         else:
-            params['out_trade_no'] = out_trade_no
+            data['out_trade_no'] = out_trade_no
 
-        data = self._post(api_path, params)
-        return data
+        return self._post(path, data)
 
     def close_order(self, out_trade_no):
         """`关闭订单
         <https://pay.weixin.qq.com/wiki/doc/api/app.php?chapter=9_3&index=5>`_
         """
-        api_path = '/pay/closeorder'
-        params = dict(out_trade_no=out_trade_no)
-        return self._post(api_path, params)
+        path = '/pay/closeorder'
+        data = dict(out_trade_no=out_trade_no)
+        return self._post(path, data)
 
     def refund(self, out_trade_no, out_refund_no, total_fee, refund_fee):
         """`退款 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4>`_
         """
-        api_path = '/secapi/pay/refund'
-        params = dict(
+        path = '/secapi/pay/refund'
+        data = dict(
             out_trade_no=out_trade_no,
             out_refund_no=out_refund_no,
             total_fee=total_fee,
             refund_fee=refund_fee,
             op_user_id=self.mch_id
         )
-        return self._post(api_path, params, cert=True)
+        return self._post(path, data, cert=True)
 
     def sendredpack(self, mch_billno, send_name, re_openid, total_amount,
                     wishing, client_ip, act_name, remark):
@@ -196,8 +195,8 @@ class WXPay(object):
         :params act_name: 活动名称
         :params remark: 备注信息
         """
-        api_path = '/mmpaymkttransfers/sendredpack'
-        params = dict(
+        path = '/mmpaymkttransfers/sendredpack'
+        data = dict(
             wxappid=self.appid,
             mch_billno=mch_billno,
             send_name=send_name,
@@ -209,18 +208,18 @@ class WXPay(object):
             act_name=act_name,
             remark=remark
         )
-        return self._post(api_path, params, cert=True, sendredpack=True)
+        return self._post(path, data, cert=True, sendredpack=True)
 
     def get_redpack_info(self, mch_billno):
         """查询红包信息
         :param mch_billno: 商户订单号
         """
-        api_path = '/mmpaymkttransfers/gethbinfo'
-        params = dict(
+        path = '/mmpaymkttransfers/gethbinfo'
+        data = dict(
             mch_billno=mch_billno,
             bill_type='MCHT'
         )
-        return self._post(api_path, params, cert=True)
+        return self._post(path, data, cert=True)
 
     def get_app_prepay_data(self, prepay_id):
         """返回给客户端的prepay数据
