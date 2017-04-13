@@ -221,6 +221,12 @@ class WXPay(object):
         )
         return self._post(path, data, cert=True)
 
+    def get_sign_key(self):
+        """获取验签秘钥，沙箱环境下有效"""
+        path = '/pay/getsignkey'
+        data = dict()
+        return self._post(path, data)
+
     def get_app_prepay_data(self, prepay_id):
         """返回给客户端的prepay数据
 
