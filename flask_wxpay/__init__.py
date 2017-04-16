@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '0.1.7'  # noqa
+__version__ = '0.1.8'  # noqa
 
 from datetime import datetime, timedelta
 import time
@@ -224,7 +224,7 @@ class WXPay(object):
 
     def get_sign_key(self):
         """获取验签秘钥，沙箱环境下有效"""
-        path = '/pay/getsignkey'
+        path = '/sandboxnew/pay/getsignkey'
         data = dict()
         return self._post(path, data, check_result=False)
 
