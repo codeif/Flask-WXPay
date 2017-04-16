@@ -41,6 +41,17 @@ class WXPay(object):
         """添加发送签名
         处理返回结果成dict, 并检查签名
         """
+        r = self._post_resp(path, data, use_cert)
+        xml = r.text
+        data = xml_to_dict(xml)
+        # 使用证书的接口不检查sign
+        if check_result:
+            check_sign = not use_cert
+            self.check_data(data, check_sign)
+        return data
+
+    def _post_resp(self, path, data, use_cert=False):
+        """post发送请求，返回requests.Response对象"""
         base_data = dict(
             appid=self.appid,
             mch_id=self.mch_id,
@@ -81,13 +92,7 @@ class WXPay(object):
                                                   force_update=True)
         if r.encoding == 'ISO-8859-1':
             r.encoding = 'UTF-8'
-        xml = r.text
-        data = xml_to_dict(xml)
-        # 使用证书的接口不检查sign
-        if check_result:
-            check_sign = not use_cert
-            self.check_data(data, check_sign)
-        return data
+        return r
 
     def get_sign(self, data):
         """生成签名"""
@@ -221,6 +226,20 @@ class WXPay(object):
             bill_type='MCHT'
         )
         return self._post(path, data, cert=True)
+
+    def download_bill(self, bill_date, bill_type='ALL'):
+        """`现在对账单 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_6>`_
+
+        :params bill_date: 下载对账单的日期，格式：20140603
+        :params bill_type: ALL, SUCCESS, REFUND, RECHARGE_REFUND
+        :return: response.Response对象
+        """
+        path = '/pay/downloadbill'
+        data = dict(
+            bill_date=bill_date,
+            bill_type=bill_type,
+        )
+        return self._post_resp(path, data)
 
     def get_sign_key(self):
         """获取验签秘钥，沙箱环境下有效"""
