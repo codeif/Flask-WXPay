@@ -188,8 +188,8 @@ class WXPay(object):
         )
         return self._post(path, data, cert=True)
 
-    def sendredpack(self, mch_billno, send_name, re_openid, total_amount,
-                    wishing, client_ip, act_name, remark):
+    def send_redpack(self, mch_billno, send_name, re_openid, total_amount,
+                     wishing, client_ip, act_name, remark):
         """发红包
 
         :params mch_billno: 商户订单号
