@@ -35,14 +35,17 @@ initialized::
 配置项
 ------
 
-==========================  =============================
+==========================  ================================
+WXPAY_BASE_URL              默认值: https://api.mch.weixin.qq.com
+WXPAY_REQUEST_TIMEOUT       默认值: 10
 WX_APPID                    公众账号ID
 WXPAY_MCHID                 商户号
 WXPAY_KEY                   商户支付密钥Key
 WXPAY_NOTIFY_URL            默认异步通知url
-WXPAY_CERT_PATH             默认值None
-WXPAY_CERT_KEY_PATH         默认值None
-==========================  =============================
+WXPAY_ROOTCA_PATH           rootca证书路径，默认值False
+WXPAY_APICLIENT_CERT_PATH   客户端证书路径，默认值None
+WXPAY_APICLIENT_KEY_PATH    客户端证书key的路径，默认值None
+==========================  ================================
 
 
 API

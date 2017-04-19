@@ -8,34 +8,37 @@ import time
 import json
 import requests
 
-import httpdns
-
 from .utils import gen_random_str, md5, dict_to_xml, xml_to_dict, now_str  # noqa
 from .exceptions import (
     WXPayError, CertError, ReturnCodeFail, ResultCodeFail, SignError)
+from .compat import urljoin
 
 
 class WXPay(object):
     """微信支付类"""
 
     def __init__(self, app=None):
-        self.api_host = 'api.mch.weixin.qq.com'
-        self.scheme = 'https'
-        self.api_host_ip = httpdns.get_ip(self.api_host)
-        self.timeout = 10
-
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app):
+        self.base_url = app.config.get('WXPAY_BASE_URL',
+                                       'https://api.mch.weixin.qq.com')
+        self.request_timeout = app.config.get('WXPAY_REQUEST_TIMEOUT', 10)
+
         self.appid = app.config['WX_APPID']
         self.sandbox = app.config.get('WXPAY_SANDBOX', False)
         self.mch_id = app.config['WXPAY_MCHID']
         self.key = app.config['WXPAY_KEY']
         self.notify_url = app.config['WXPAY_NOTIFY_URL']
 
-        self.cert_path = app.config.get('WXPAY_CERT_PATH')
-        self.cert_key_path = app.config.get('WXPAY_CERT_KEY_PATH')
+        self.rootca_path = app.config.get('WXPAY_ROOTCA_PATH', False)
+        self.apiclient_cert_path = app.config.get('WXPAY_APICLIENT_CERT_PATH')
+        self.apiclient_key_path = app.config.get('WXPAY_APICLIENT_KEY_PATH')
+
+        # 发送请求的session
+        self.session = requests.Session()
+        self.session.verify = app.config.get('WXPAY_ROOTCA_PATH', False)
 
     def _post(self, path, data, use_cert=False, check_result=True):
         """添加发送签名
@@ -67,29 +70,19 @@ class WXPay(object):
         if use_cert:
             if not (self.cert_path and self.cert_key_path):
                 raise CertError()
-            api_cert = (self.cert_path, self.cert_key_path)
+            apiclient_cert = (self.apiclient_cert_path,
+                              self.apiclient_key_path)
         else:
-            api_cert = None
+            apiclient_cert = None
 
         if self.sandbox:
             path = '/sandboxnew' + path
-        for _ in range(3):
-            try:
-                url = '{0}://{1}{2}'.format(self.scheme,
-                                            self.api_host_ip,
-                                            path)
-                r = requests.post(url, data=xml_data, timeout=self.timeout,
-                                  verify=False, cert=api_cert,
-                                  headers={'Host': self.api_host})
-                if '<return_code>' not in r.text:
-                    # 不是微信支付接口返回的数据, 重置ip
-                    self.ip = httpdns.get_ip(self.api_host, force_update=True)
-                    continue
 
-                break
-            except (requests.ConnectionError, requests.Timeout):
-                self.api_host_ip = httpdns.get_ip(self.api_host,
-                                                  force_update=True)
+        url = urljoin(self.base_url, path)
+        r = self.session.post(url,
+                              data=xml_data,
+                              timeout=self.request_timeout,
+                              cert=apiclient_cert)
         if r.encoding == 'ISO-8859-1':
             r.encoding = 'UTF-8'
         return r

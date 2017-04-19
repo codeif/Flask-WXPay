@@ -24,12 +24,16 @@ is_py2 = (_ver[0] == 2)
 is_py3 = (_ver[0] == 3)
 
 if is_py2:
+    from urlparse import urljoin
+
     bytes = str
     str = unicode  # noqa
     basestring = basestring  # noqa
     numeric_types = (int, long, float)  # noqa
 
 elif is_py3:
+    from urllib.parse import urljoin  # noqa
+
     str = str
     bytes = bytes
     basestring = (str, bytes)
