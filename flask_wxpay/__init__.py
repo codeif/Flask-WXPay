@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '0.1.10'  # noqa
+__version__ = '0.1.11'  # noqa
 
 from datetime import datetime, timedelta
 import time
@@ -68,7 +68,7 @@ class WXPay(object):
 
         xml_data = dict_to_xml(data).encode('utf-8')
         if use_cert:
-            if not (self.cert_path and self.cert_key_path):
+            if not (self.apiclient_cert_path and self.apiclient_key_path):
                 raise CertError()
             apiclient_cert = (self.apiclient_cert_path,
                               self.apiclient_key_path)
@@ -179,7 +179,7 @@ class WXPay(object):
             refund_fee=refund_fee,
             op_user_id=self.mch_id
         )
-        return self._post(path, data, cert=True)
+        return self._post(path, data, use_cert=True)
 
     def send_redpack(self, mch_billno, send_name, re_openid, total_amount,
                      wishing, client_ip, act_name, remark):
@@ -207,7 +207,7 @@ class WXPay(object):
             act_name=act_name,
             remark=remark
         )
-        return self._post(path, data, cert=True, sendredpack=True)
+        return self._post(path, data, use_cert=True, sendredpack=True)
 
     def get_redpack_info(self, mch_billno):
         """查询红包信息
@@ -218,7 +218,7 @@ class WXPay(object):
             mch_billno=mch_billno,
             bill_type='MCHT'
         )
-        return self._post(path, data, cert=True)
+        return self._post(path, data, use_cert=True)
 
     def download_bill(self, bill_date, bill_type='ALL'):
         """`现在对账单 <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_6>`_
