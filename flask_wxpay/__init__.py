@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '0.1.11'  # noqa
+__version__ = '0.1.12'  # noqa
 
 from datetime import datetime, timedelta
 import time
@@ -158,6 +158,16 @@ class WXPay(object):
         else:
             data['out_trade_no'] = out_trade_no
 
+        return self._post(path, data)
+
+    def query_refund(self, out_trade_no):
+        """`查询退款
+        <https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_5>`_
+        """
+        path = '/pay/refundquery'
+        data = dict(
+            out_trade_no=out_trade_no,
+        )
         return self._post(path, data)
 
     def close_order(self, out_trade_no):
