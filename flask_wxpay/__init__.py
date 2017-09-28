@@ -38,7 +38,7 @@ class WXPay(object):
 
         # 发送请求的session
         self.session = requests.Session()
-        self.session.verify = app.config.get('WXPAY_ROOTCA_PATH', False)
+        self.session.verify = app.config.get('WXPAY_ROOTCA_PATH', None)
 
     def _post(self, path, data, use_cert=False, check_result=True):
         """添加发送签名
