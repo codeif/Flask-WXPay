@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '0.1.12'  # noqa
+__version__ = '0.1.13'  # noqa
 
 from datetime import datetime, timedelta
 import time
