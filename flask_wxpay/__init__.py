@@ -3,15 +3,15 @@
 
 __version__ = '0.1.13'  # noqa
 
-from datetime import datetime, timedelta
-import time
 import json
+import time
+from datetime import datetime, timedelta
+
 import requests
 
-from .utils import gen_random_str, md5, dict_to_xml, xml_to_dict, now_str  # noqa
-from .exceptions import (
-    WXPayError, CertError, ReturnCodeFail, ResultCodeFail, SignError)
 from .compat import urljoin
+from .exceptions import CertError, ResultCodeFail, ReturnCodeFail, SignError, WXPayError
+from .utils import dict_to_xml, gen_random_str, md5, now_str, xml_to_dict  # noqa
 
 
 class WXPay(object):
@@ -32,7 +32,6 @@ class WXPay(object):
         self.key = app.config['WXPAY_KEY']
         self.notify_url = app.config['WXPAY_NOTIFY_URL']
 
-        self.rootca_path = app.config.get('WXPAY_ROOTCA_PATH', False)
         self.apiclient_cert_path = app.config.get('WXPAY_APICLIENT_CERT_PATH')
         self.apiclient_key_path = app.config.get('WXPAY_APICLIENT_KEY_PATH')
 

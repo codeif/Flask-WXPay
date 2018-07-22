@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
+import hashlib
 import random
 import string
-import hashlib
 import xml.etree.ElementTree as ElementTree
 from datetime import datetime
 
-from .compat import str, numeric_types, bytes
+from .compat import bytes, numeric_types, str
 
 
 def xml_to_dict(xml):
