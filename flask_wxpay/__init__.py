@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '0.1.13'  # noqa
+__version__ = '0.1.14'  # noqa
 
 import json
 import time
@@ -186,7 +186,6 @@ class WXPay(object):
             out_refund_no=out_refund_no,
             total_fee=total_fee,
             refund_fee=refund_fee,
-            op_user_id=self.mch_id
         )
         return self._post(path, data, use_cert=True)
 
