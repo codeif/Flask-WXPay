@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '0.1.14'  # noqa
+__version__ = '0.1.15'  # noqa
 
 import json
 import time
@@ -257,7 +257,7 @@ class WXPay(object):
         """
         data = dict(
             appid=self.appid,
-            noncestr=gen_random_str,
+            noncestr=gen_random_str(),
             package='Sign=WXPay',
             partnerid=self.mch_id,
             prepayid=prepay_id,
