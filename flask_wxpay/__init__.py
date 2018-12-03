@@ -27,7 +27,6 @@ class WXPay(object):
         self.request_timeout = app.config.get('WXPAY_REQUEST_TIMEOUT', 10)
 
         self.appid = app.config['WX_APPID']
-        self.sandbox = app.config.get('WXPAY_SANDBOX', False)
         self.mch_id = app.config['WXPAY_MCHID']
         self.key = app.config['WXPAY_KEY']
         self.notify_url = app.config['WXPAY_NOTIFY_URL']
@@ -38,6 +37,10 @@ class WXPay(object):
         # 发送请求的session
         self.session = requests.Session()
         self.session.verify = app.config.get('WXPAY_ROOTCA_PATH', None)
+        
+        self.sandbox = app.config.get('WXPAY_SANDBOX', False)
+            if self.sandbox: # 沙箱模式时自动获取sandbox_signkey并替换self.key
+                self.key = self.get_sign_key()['sandbox_signkey']
 
     def _post(self, path, data, use_cert=False, check_result=True):
         """添加发送签名
