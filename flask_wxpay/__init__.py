@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '0.1.15'  # noqa
+__version__ = '1.0.0'  # noqa
 
 import json
 import time
@@ -37,10 +37,10 @@ class WXPay(object):
         # 发送请求的session
         self.session = requests.Session()
         self.session.verify = app.config.get('WXPAY_ROOTCA_PATH', None)
-        
+
         self.sandbox = app.config.get('WXPAY_SANDBOX', False)
         if self.sandbox:  # 沙箱模式时自动获取sandbox_signkey并替换self.key
-            self.key = self.get_sign_key()['sandbox_signkey']
+            self.key = self.get_sandbox_signkey()
 
     def _post(self, path, data, use_cert=False, check_result=True):
         """添加发送签名
@@ -245,11 +245,14 @@ class WXPay(object):
         )
         return self._post_resp(path, data)
 
-    def get_sign_key(self):
+    def get_sandbox_signkey(self):
         """获取验签秘钥，沙箱环境下有效"""
         path = '/sandboxnew/pay/getsignkey'
         data = dict()
-        return self._post(path, data, check_result=False)
+        j = self._post(path, data, check_result=False)
+        if 'sandbox_signkey' not in j:
+            raise WXPayError('获取signbox_signkey失败 {}'.format(json.dumps(j, ensure_ascii=False)))
+        return j['sandbox_signkey']
 
     def get_app_prepay_data(self, prepay_id):
         """返回给客户端的prepay数据
