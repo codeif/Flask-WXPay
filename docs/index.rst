@@ -45,6 +45,7 @@ WXPAY_NOTIFY_URL            默认异步通知url
 WXPAY_ROOTCA_PATH           rootca证书路径，对应requests的verify参数,默认为None
 WXPAY_APICLIENT_CERT_PATH   客户端证书路径，默认值None
 WXPAY_APICLIENT_KEY_PATH    客户端证书key的路径，默认值None
+WXPAY_SANDBOX               是否使用沙箱环境，默认为 False
 ==========================  =====================================================
 
 
