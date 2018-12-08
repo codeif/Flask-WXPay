@@ -39,8 +39,8 @@ class WXPay(object):
         self.session.verify = app.config.get('WXPAY_ROOTCA_PATH', None)
         
         self.sandbox = app.config.get('WXPAY_SANDBOX', False)
-            if self.sandbox: # 沙箱模式时自动获取sandbox_signkey并替换self.key
-                self.key = self.get_sign_key()['sandbox_signkey']
+        if self.sandbox:  # 沙箱模式时自动获取sandbox_signkey并替换self.key
+            self.key = self.get_sign_key()['sandbox_signkey']
 
     def _post(self, path, data, use_cert=False, check_result=True):
         """添加发送签名
