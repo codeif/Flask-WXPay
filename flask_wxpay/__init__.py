@@ -64,6 +64,9 @@ class WXPay(object):
         )
         if path == '/mmpaymkttransfers/sendredpack':
             del base_data['appid']
+        if path == '/mmpaymkttransfers/promotion/transfers':
+            base_data['mch_appid'] = base_data.pop('appid')
+            base_data['mchid'] = base_data.pop('mch_id')
         data.update(base_data)
 
         data['sign'] = self.get_sign(data)
@@ -120,7 +123,7 @@ class WXPay(object):
         path = '/pay/unifiedorder'
         now = datetime.now()
         time_start = now.strftime('%Y%m%d%H%M%S')
-        time_expire = (now + timedelta(seconds=expire_seconds))\
+        time_expire = (now + timedelta(seconds=expire_seconds)) \
             .strftime('%Y%m%d%H%M%S')
 
         data = dict(
@@ -244,6 +247,48 @@ class WXPay(object):
             bill_type=bill_type,
         )
         return self._post_resp(path, data)
+
+    def transfers(self, partner_trade_no, openid, amount, desc, ip,
+                  check_name='NO_CHECK', re_user_name=None):
+        """`企业向微信用户个人付款到零钱
+        <https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_2>`_
+
+        :params partner_trade_no: 商户订单号
+        :params openid: 用户openid
+        :params desc: 企业付款备注
+        :params amount: 企业付款金额，单位为分
+        :params ip: 该IP同在商户平台设置的IP白名单中的IP没有关联，该IP可传用户端或者服务端的IP
+        :params check_name: 校验用户姓名选项，NO_CHECK：不校验真实姓名 FORCE_CHECK：强校验真实姓名
+        :params re_user_name: 收款用户真实姓名，如果check_name设置为FORCE_CHECK，则必填用户真实姓名
+        :rtype: dict
+        """
+        path = '/mmpaymkttransfers/promotion/transfers'
+        data = dict(
+            partner_trade_no=partner_trade_no,
+            openid=openid,
+            amount=amount,
+            desc=desc,
+            spbill_create_ip=ip,
+            check_name=check_name
+        )
+        if check_name == 'FORCE_CHECK':
+            if not re_user_name:
+                raise WXPayError('re_user_nam参数不能为None')
+            data['re_user_name'] = re_user_name
+        result = self._post(path, data, use_cert=True)
+        return result
+
+    def get_transfers_info(self, partner_trade_no):
+        """`企业向微信用户个人付款操作进行结果查询
+        <https://pay.weixin.qq.com/wiki/doc/api/tools/mch_pay.php?chapter=14_3>`_
+
+        :params partner_trade_no: 商户订单号
+        :rtype: dict
+        """
+        path = '/mmpaymkttransfers/gettransferinfo'
+        data = dict(partner_trade_no=partner_trade_no)
+        result = self._post(path, data, use_cert=True)
+        return result
 
     def get_sandbox_signkey(self):
         """获取验签秘钥，沙箱环境下有效"""
