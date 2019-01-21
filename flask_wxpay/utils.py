@@ -2,7 +2,7 @@
 import hashlib
 import random
 import string
-import xml.etree.ElementTree as ElementTree
+import defusedxml.ElementTree as ElementTree
 from datetime import datetime
 
 from .compat import bytes, numeric_types, str
