@@ -20,6 +20,6 @@ setup(
     author_email='me@codeif.com',
     url='https://github.com/codeif/Flask-WXPay',
     license='MIT',
-    install_requires=['requests'],
+    install_requires=['requests', 'defusedxml'],
     packages=find_packages(),
 )
