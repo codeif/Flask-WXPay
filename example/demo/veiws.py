@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, jsonify, redirect, render_template, request, session, url_for
 from flask_wxpay import now_str, xml_to_dict
 
 from .core import wx_oauth, wxpay
@@ -61,6 +61,13 @@ def transfers():
     resp = wxpay.transfers(partner_trade_no, openid, amount, '描述', '127.0.0.1')
     print(resp)
     return partner_trade_no
+
+
+@bp.route('/get-transfers-info')
+def partner_trade_no():
+    partner_trade_no = 'test20190108212028745982'
+    transfers_info = wxpay.get_transfers_info(partner_trade_no)
+    return jsonify(transfers_info)
 
 
 @bp.route('/hello')

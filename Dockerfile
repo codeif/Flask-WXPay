@@ -7,7 +7,7 @@ WORKDIR /app/example
 
 RUN pipenv sync
 
-ENV TZ=Asia/Shanghai
+ENV TZ=Asia/Shanghai PYTHONUNBUFFERED=1
 ENV FLASK_ENV=development FLASK_APP=demo
 
 EXPOSE 5000
