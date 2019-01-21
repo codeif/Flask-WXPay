@@ -21,6 +21,13 @@
 
     # WXPAY_SANDBOX = True
 
+    WXPAY_APICLIENT_CERT_PATH = '/app/example/instance/apiclient_cert.pem'
+    WXPAY_APICLIENT_KEY_PATH = '/app/example/instance/apiclient_key.pem'
+
+    YOUR_OPENID = 'your open id'
+    REDIRECT_HOST = 'http://youdomain.com'
+
+
 
 配置
 ---------
