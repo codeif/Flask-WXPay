@@ -3,11 +3,11 @@ import re
 
 from setuptools import find_packages, setup
 
-with open('README.rst') as f:
+with open('README.rst', encoding='utf-8') as f:
     readme = f.read()
 
 
-with open('flask_wxpay/__init__.py', 'r') as fd:
+with open('flask_wxpay/__init__.py', 'r', encoding='utf-8') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
                         fd.read(), re.MULTILINE).group(1)
 
