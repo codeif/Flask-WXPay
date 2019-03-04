@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '1.0.2'  # noqa
+__version__ = '1.0.3'  # noqa
 
 import json
 import time
