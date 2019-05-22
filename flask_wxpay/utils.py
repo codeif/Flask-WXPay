@@ -2,8 +2,9 @@
 import hashlib
 import random
 import string
-import defusedxml.ElementTree as ElementTree
 from datetime import datetime
+
+import defusedxml.ElementTree as ElementTree
 
 from .compat import bytes, numeric_types, str
 

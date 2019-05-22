@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """微信支付的flask扩展"""
 
-__version__ = '1.0.3'  # noqa
+__version__ = '1.0.4'  # noqa
 
 import json
 import time
@@ -33,10 +33,6 @@ class WXPay(object):
 
         self.apiclient_cert_path = app.config.get('WXPAY_APICLIENT_CERT_PATH')
         self.apiclient_key_path = app.config.get('WXPAY_APICLIENT_KEY_PATH')
-
-        # 发送请求的session
-        self.session = requests.Session()
-        self.session.verify = app.config.get('WXPAY_ROOTCA_PATH', None)
 
         self.sandbox = app.config.get('WXPAY_SANDBOX', False)
         if self.sandbox:  # 沙箱模式时自动获取sandbox_signkey并替换self.key
@@ -84,10 +80,7 @@ class WXPay(object):
             path = '/sandboxnew' + path
 
         url = urljoin(self.base_url, path)
-        r = self.session.post(url,
-                              data=xml_data,
-                              timeout=self.request_timeout,
-                              cert=apiclient_cert)
+        r = requests.post(url, data=xml_data, timeout=self.request_timeout, cert=apiclient_cert)
         if r.encoding == 'ISO-8859-1':
             r.encoding = 'UTF-8'
         return r
